@@ -35,15 +35,9 @@ class Match:
         else:
             self.user2_score += 1
 
-    def __init__(self):
-        self.user1 = input("Name of first user? ")
-        self.user2 = input("Name of second user? ")
-        self.user1_score = 0
-        self.user2_score = 0
-        self.match_list = []
-
+    def play_new_match(self):
         resp = "Y"
-        while resp != "N":
+        while True:
             if resp == "Y":
                 resp = self.new_game_prompt()
                 if resp == "Y":
@@ -51,4 +45,11 @@ class Match:
                     self.match_stats_prompt()
             else:
                 self.closing_prompt()
-            
+                break
+
+    def __init__(self):
+        self.user1 = input("Name of first user? ")
+        self.user2 = input("Name of second user? ")
+        self.user1_score = 0
+        self.user2_score = 0
+        self.match_list = []
