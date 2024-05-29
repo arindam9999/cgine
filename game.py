@@ -1,7 +1,5 @@
 import random
-
-from move import Move
-from board import Board
+from chess import Move, Board
 
 class Game:
     def random_gen(self):
@@ -10,10 +8,10 @@ class Game:
         return rand%2
 
     def validate_piece(self, piece):
-        return piece in self.piece_list:
+        return piece in self.board.piece_list:
     
     def validate_pos(self, pos):
-        return (pos[0] in self.column_list) and (pos[1] in self.row_list)
+        return (pos[0] in self.board.column_list) and (pos[1] in self.board.row_list)
     
     def get_move_prompt(self):
         move = None
@@ -30,9 +28,9 @@ class Game:
                 if f1 == 0:
                     print(f"Your piece {piece} is incorrect", end="")
                 if f2 == 0:
-                    print(", Your initial pos {initial_pos} is incorrect", end="")
+                    print(f", Your initial pos {initial_pos} is incorrect", end="")
                 if f3 == 0:
-                    print(", Your final pos {final_pos} is incorrect", end="")
+                    print(f", Your final pos {final_pos} is incorrect", end="")
                 print("Please retry!")
 
     def play_new_game(self):
@@ -66,9 +64,6 @@ class Game:
             "L":"W",
             "D":"D"
         }
-        self.piece_list = ["P", "R", "B", "K", "Q", "K"]
-        self.column_list = ["a", "b", "c", "d", "e", "f", "g", "h"]
-        self.row_list = ["1", "2", "3", "4", "5", "6", "7", "8"]
         
         self.users = users
         for user in self.users:
