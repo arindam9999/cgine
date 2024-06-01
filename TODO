@@ -1,0 +1,9 @@
+1. Board functions are remaining
+    a. initialize_board
+    b. is_valid_move
+    c. make_move 
+    d. check_state
+    e. print_board
+    f. promote_to
+
+2. All pieces are left only
