@@ -5,9 +5,13 @@
     d. check_state
     e. print_board (V)
     f. promote_to 
-    g. __king_check
-    h. __piece_in_path
+    g. __king_check (V)
+    h. __piece_in_path (V)
+    i. get_all_possible_moves
 
 2. All pieces are left only (V)
 3. En Passant Support
 4. Castling for King Support
+6. Time clock support 
+7. 3fold repetition draw support
+8. 50 moves without capture draw support
