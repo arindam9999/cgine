@@ -1,9 +1,13 @@
 1. Board functions are remaining
-    a. initialize_board
+    a. initialize_board (V)
     b. is_valid_move
-    c. make_move 
+    c. make_move (V)
     d. check_state
-    e. print_board
-    f. promote_to
+    e. print_board (V)
+    f. promote_to 
+    g. __king_check
+    h. __piece_in_path
 
-2. All pieces are left only
+2. All pieces are left only (V)
+3. En Passant Support
+4. Castling for King Support
