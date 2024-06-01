@@ -8,7 +8,7 @@ class Game:
         return rand%2
 
     def validate_piece(self, piece):
-        return piece in self.board.piece_list:
+        return piece in self.board.piece_list
     
     def validate_pos(self, pos):
         return (pos[0] in self.board.column_list) and (pos[1] in self.board.row_list)
@@ -19,7 +19,7 @@ class Game:
             piece, initial_pos, final_pos = input(f"{self.users[self.to_play].name} your move:").split(" ")
             f1, f2, f3 = self.validate_piece(piece), self.validate_pos(initial_pos), self.validate_pos(final_pos)
             if f1 & f2 & f3:
-                move = Move(f2, f3)
+                move = Move(initial_pos, final_pos)
                 if self.board.is_valid_move(move):
                     return move
                 else:
@@ -39,7 +39,7 @@ class Game:
             move = self.get_move_prompt()
             self.board.make_move(move)
             self.moves.append(move)
-            state = board.check_state()
+            state = self.board.check_state()
             if state in ["W", "L", "D"]:
                 self.users[self.to_play].score += self.state_2_score[state]
                 self.users[self.to_play].status[-1] = state
@@ -71,6 +71,6 @@ class Game:
             user.status.append("U")
         self.choose_color_prompt()
 
-        self.board = []
+        self.board = Board()
         self.moves = []
         self.to_play = 0
