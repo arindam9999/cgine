@@ -5,6 +5,7 @@ class Move:
     def __init__(self, initial_pos, final_pos):
         self.initial_pos = [ord(initial_pos[0]) - ord("a"), ord(initial_pos[1]) - ord("1")]
         self.final_pos = [ord(final_pos[0]) - ord("a"), ord(final_pos[1]) - ord("1")] 
+
     
 
 class Piece(ABC):
@@ -12,8 +13,22 @@ class Piece(ABC):
     def set_piece_type(self):
         pass
 
+    @abstractmethod
     def allowed_move(self):
         pass
+    
+    def get_candidate_moves(self, x, y, is_valid_matrix_location):
+        """
+        Gives all possible moves, with highest degrees of freedom
+        """
+        for i in range(1, self.__class__.RANGE_OF_MOTION + 1):
+            for dx, dy in self.__class__.UNIT_VECTORS:
+                X, Y = x + i * dx, y + i * dy 
+                if not is_valid_matrix_location(X, Y):
+                    continue 
+                move = Move(self.piece_type, Board.pos_array_2_string_converter(x, y), Board.pos_array_2_string_converter(X, Y))
+                moves.append(move)
+        return moves 
     
     def print_piece(self):
         print(f"{self.piece_type}({self.color})", end="")
@@ -26,6 +41,10 @@ class Piece(ABC):
 
 
 class King(Piece):
+    # Static variables
+    UNIT_VECTORS = [[1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1], [0, -1], [1, -1]]
+    RANGE_OF_MOTION = 1
+
     def allowed_move(self, move, matrix):
         if move.initial_pos == move.final_pos:
             return False
@@ -41,6 +60,10 @@ class King(Piece):
 
 
 class Queen(Piece):
+    # Static variables
+    UNIT_VECTORS = [[1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1], [0, -1], [1, -1]]
+    RANGE_OF_MOTION = 7
+
     def allowed_move(self, move, matrix):
         if move.initial_pos == move.final_pos:
             return False
@@ -56,6 +79,10 @@ class Queen(Piece):
 
 
 class Knight(Piece):
+    # Static variables
+    UNIT_VECTORS = [[2, 1], [1, 2], [-1, 2], [-2, 1], [-2, -1], [-1, -2], [1, -2], [2, -1]]
+    RANGE_OF_MOTION = 1
+
     def allowed_move(self, move, matrix):
         if move.initial_pos == move.final_pos:
             return False
@@ -71,6 +98,10 @@ class Knight(Piece):
 
 
 class Bishop(Piece):
+    # Static variables
+    UNIT_VECTORS = [[1, 1], [-1, 1], [-1, -1], [1, -1]]
+    RANGE_OF_MOTION = 7
+
     def allowed_move(self, move, matrix):
         if move.initial_pos == move.final_pos:
             return False
@@ -86,6 +117,10 @@ class Bishop(Piece):
 
 
 class Rook(Piece):
+    # Static variables
+    UNIT_VECTORS = [[1, 0], [0, 1], [-1, 0], [0, -1]]
+    RANGE_OF_MOTION = 7
+
     def allowed_move(self, move, matrix):
         if move.initial_pos == move.final_pos:
             return False
@@ -101,6 +136,10 @@ class Rook(Piece):
 
 
 class Pawn(Piece):
+    # Static variables
+    UNIT_VECTORS = [[0, 1], [0, 2], [1, 1], [-1, 1]]
+    RANGE_OF_MOTION = 1
+
     def allowed_move(self, move, matrix):
         if move.initial_pos == move.final_pos:
             return False
@@ -161,6 +200,19 @@ class Pawn(Piece):
 
 
 class Board:
+    # Static variables
+    COLUMN_LIST = ["a", "b", "c", "d", "e", "f", "g", "h"]
+    ROW_LIST = ["1", "2", "3", "4", "5", "6", "7", "8"]
+    PIECE_LIST = ["P", "R", "B", "K", "Q", "N"]
+    COLOR_MAP = {
+        0:"W",
+        1:"B"
+    }
+
+    @staticmethod
+    def pos_array_2_string_converter(x, y):
+        return self.__class__.COLUMN_LIST[x] + str(self.__class__.ROW_LIST[y])
+
     def is_valid_matrix_location(self, X, Y):
         for val in [X, Y]:
             if val < 0 or val >= 8:
@@ -242,6 +294,7 @@ class Board:
         return False
 
     def __is_check_state(self):
+        # Check if there is any check to the king in the current board state
         if self.__is_check_from_knight() or self.__is_row_column_diagonal_check():
             return True 
         return False
@@ -271,7 +324,7 @@ class Board:
             self.print_board()
             return False
         # If it wrong colored piece
-        if ipiece.color != self.color_map[self.to_move]:
+        if ipiece.color != self.__class__.COLOR_MAP[self.to_move]:
             print(f"Error! trying to move the wrong colored piece! {ipiece.color}, {ipiece.piece_type}")
             return False
         # If same colored piece present at final location
@@ -321,8 +374,25 @@ class Board:
                 self.__iu_king_location[self.to_move] = [fx, fy]
     
     def get_all_possible_moves(self):
+        """
+        1. Need to get all the candidate moves for all pieces of that color
+        2. Check among all those moves which ones are valid
+        3. Return a list of all the valid moves
+        """
         # TODO: Create function to get all possible moves 
-        return ["N a4 b6"]
+        possible_move_list = []
+        for y in range(0, 8):
+            for x in range(0, 8):
+                piece = self.matrix[y][x]
+                if piece == None:
+                    continue
+                if piece.color != self.__class__.COLOR_MAP[self.to_move]:
+                    continue 
+                moves = piece.get_candidate_moves(x, y, self.is_valid_matrix_location)
+                for move in moves: 
+                    if self.is_valid_move(move):
+                        possible_move_list.append(move)
+        return possible_move_list
 
     def check_state(self):
         in_check = False 
@@ -357,16 +427,8 @@ class Board:
         pass
 
     def __init__(self):
-        self.column_list = ["a", "b", "c", "d", "e", "f", "g", "h"]
-        self.row_list = ["1", "2", "3", "4", "5", "6", "7", "8"]
-        self.piece_list = ["P", "R", "B", "K", "Q", "N"]
-
         self.matrix = []
         self.to_move = 0
-        self.color_map = {
-            0:"W",
-            1:"B"
-        }
         self.king_location = [[4, 0], [4, 7]]
 
         self.__iu_king_location = [[4, 0], [4, 7]]

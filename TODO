@@ -1,17 +1,33 @@
 1. Board functions are remaining
     a. initialize_board (V)
-    b. is_valid_move
+    b. is_valid_move(V)
     c. make_move (V)
-    d. check_state
+    d. check_state (V)
     e. print_board (V)
     f. promote_to 
     g. __king_check (V)
     h. __piece_in_path (V)
-    i. get_all_possible_moves
+    i. get_all_possible_moves (V)
 
 2. All pieces are left only (V)
 3. En Passant Support
 4. Castling for King Support
 6. Time clock support 
 7. 3fold repetition draw support
-8. 50 moves without capture draw support
+8. 50 moves without capture draw support 
+9. Exhaustive UT support
+10. Move suggestion engine
+11. Refactor these function(s): 
+    a. def is_valid_matrix_location(self, X, Y): (Used in both pieces and board)
+        # Not required currently as we are passing this function pointer instead
+
+12. Refactor variables to make them constant and static in chess (V)
+    # Static variables
+    COLUMN_LIST = ["a", "b", "c", "d", "e", "f", "g", "h"]
+    ROW_LIST = ["1", "2", "3", "4", "5", "6", "7", "8"]
+    PIECE_LIST = ["P", "R", "B", "K", "Q", "N"]
+    COLOR_MAP = {
+        0:"W",
+        1:"B"
+    }
+13. Refactor piece type as static variable 

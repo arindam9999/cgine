@@ -8,10 +8,10 @@ class Game:
         return rand%2
 
     def validate_piece(self, piece):
-        return piece in self.board.piece_list
+        return piece in Board.PIECE_LIST
     
     def validate_pos(self, pos):
-        return (pos[0] in self.board.column_list) and (pos[1] in self.board.row_list)
+        return (pos[0] in Board.COLUMN_LIST) and (pos[1] in Board.ROW_LIST)
     
     def get_move_prompt(self):
         move = None
