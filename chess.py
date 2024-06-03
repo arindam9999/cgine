@@ -184,7 +184,7 @@ class Pawn(Piece):
             if move.initial_pos[1] == 6:
                 flag2 &= (y_displacement == -2)
             else:
-                flag2 = True
+                flag2 = False
             # Capture pieces present diagonally down.
             flag3 = (x_dist == 1) and (-1 == y_displacement)
             counter_piece = matrix[move.final_pos[1]][move.final_pos[0]]
