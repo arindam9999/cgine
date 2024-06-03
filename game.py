@@ -39,6 +39,7 @@ class Game:
             move = self.get_move_prompt()
             self.board.make_move(move)
             self.moves.append(move)
+            self.board.print_board()
             state = self.board.check_state()
             if state in ["W", "L", "D"]:
                 self.users[self.to_play].score += self.state_2_score[state]

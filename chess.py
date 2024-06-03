@@ -2,6 +2,9 @@ from abc import ABC, abstractmethod
 import copy
 
 class Move:
+    def print_move(self):
+        print(self.initial_pos, self.final_pos)
+    
     def __init__(self, initial_pos, final_pos):
         self.initial_pos = [ord(initial_pos[0]) - ord("a"), ord(initial_pos[1]) - ord("1")]
         self.final_pos = [ord(final_pos[0]) - ord("a"), ord(final_pos[1]) - ord("1")] 
@@ -21,12 +24,13 @@ class Piece(ABC):
         """
         Gives all possible moves, with highest degrees of freedom
         """
+        moves = []
         for i in range(1, self.__class__.RANGE_OF_MOTION + 1):
             for dx, dy in self.__class__.UNIT_VECTORS:
                 X, Y = x + i * dx, y + i * dy 
                 if not is_valid_matrix_location(X, Y):
                     continue 
-                move = Move(self.piece_type, Board.pos_array_2_string_converter(x, y), Board.pos_array_2_string_converter(X, Y))
+                move = Move(Board.pos_array_2_string_converter(x, y), Board.pos_array_2_string_converter(X, Y))
                 moves.append(move)
         return moves 
     
@@ -156,8 +160,10 @@ class Pawn(Piece):
             flag1 &= (y_displacement == 1)
             # Initial 2 square upwards
             flag2 = f1
-            if move.initial_pos[0] == 1:
+            if move.initial_pos[1] == 1:
                 flag2 &= (y_displacement == 2)
+            else:
+                flag2 = False
             # Capture pieces present diagonally up.
             flag3 = (x_dist == 1) and (1 == y_displacement)
             counter_piece = matrix[move.final_pos[1]][move.final_pos[0]]
@@ -166,6 +172,7 @@ class Pawn(Piece):
             else:
                 flag3 &= (counter_piece.color == "B")
             # TODO: No suport for en passant right now.
+            print(flag1, flag2, flag3, y_displacement,  y_displacement == 2, flag2 &)
             if flag1 or flag2 or flag3:
                 return True
         if self.color == "B":
@@ -174,8 +181,10 @@ class Pawn(Piece):
             flag1 &= (y_displacement == -1)
             # Initial 2 square downwards
             flag2 = f1
-            if move.initial_pos[0] == 6:
+            if move.initial_pos[1] == 6:
                 flag2 &= (y_displacement == -2)
+            else:
+                flag2 = True
             # Capture pieces present diagonally down.
             flag3 = (x_dist == 1) and (-1 == y_displacement)
             counter_piece = matrix[move.final_pos[1]][move.final_pos[0]]
@@ -211,7 +220,7 @@ class Board:
 
     @staticmethod
     def pos_array_2_string_converter(x, y):
-        return self.__class__.COLUMN_LIST[x] + str(self.__class__.ROW_LIST[y])
+        return Board.COLUMN_LIST[x] + str(Board.ROW_LIST[y])
 
     def is_valid_matrix_location(self, X, Y):
         for val in [X, Y]:
@@ -220,14 +229,19 @@ class Board:
         return True
 
     def __piece_in_path(self, move):
+        """
+        Creating the unit vector for the path and following it one step at a time to see if piece in path
+        """
         ix, iy, fx, fy = move.initial_pos[0], move.initial_pos[1], move.final_pos[0], move.final_pos[1]
         dx, dy = (0 if (fx - ix) == 0 else abs(fx - ix)//(fx - ix)), (0 if (fy - iy) == 0 else abs(fy - ix)//(fy - iy))
         x, y = ix, iy 
-        while x != fx or y != fy:
-            if self.matrix[y][x] != None:
-                return False 
+        while x < fx or y < fy:
             x, y = x + dx, y + dy 
-        return True
+            if x == fx and y == fy:
+                break
+            if self.matrix[y][x] != None:
+                return True
+        return False
 
     def __is_check_from_knight(self):
         color, king_location, matrix = self.to_move, self.__iu_king_location, self.__iu_matrix
@@ -315,36 +329,42 @@ class Board:
             [Rook("B"), Knight("B"), Bishop("B"), Queen("B"), King("B"), Bishop("B"), Knight("B"), Rook("B")],
         ]
 
-    def is_valid_move(self, move):
+    def is_valid_move(self, move, external=True):
         ix, iy, fx, fy = move.initial_pos[0], move.initial_pos[1], move.final_pos[0], move.final_pos[1]
         ipiece, fpiece = self.matrix[iy][ix], self.matrix[fy][fx]
         # If piece is not present at the initial location
         if ipiece == None:
-            print(f"Error! Piece not present at the initial Location! {iy}, {ix}")
+            if external:
+                print(f"Error! Piece not present at the initial Location! {iy}, {ix}")
             self.print_board()
             return False
         # If it wrong colored piece
         if ipiece.color != self.__class__.COLOR_MAP[self.to_move]:
-            print(f"Error! trying to move the wrong colored piece! {ipiece.color}, {ipiece.piece_type}")
+            if external:
+                print(f"Error! trying to move the wrong colored piece! {ipiece.color}, {ipiece.piece_type}")
             return False
         # If same colored piece present at final location
-        if fpiece != None and fpiece.color == self.to_move:
-            print(f"Error! Trying to capture same colored piece ({ipiece.color}, {ipiece.piece_type}), ({fpiece.color}, {fpiece.piece_type})")
+        if fpiece != None and fpiece.color == self.__class__.COLOR_MAP[self.to_move]:
+            if external:
+                print(f"Error! Trying to capture same colored piece ({ipiece.color}, {ipiece.piece_type}), ({fpiece.color}, {fpiece.piece_type})")
             return False
         # Check is overall piece movement is allowed in first place
         if not ipiece.allowed_move(move, self.matrix):
-            print(f"Error! This piece does not move like that bro! ({ix}, {iy}), ({fx}, {fy}), ({ipiece.color}, {ipiece.piece_type})")
+            if external:
+                print(f"Error! This piece does not move like that bro! ({ix}, {iy}), ({fx}, {fy}), ({ipiece.color}, {ipiece.piece_type})")
             return False
         # No other checks for Knight
         if ipiece.piece_type == "N":
             return True
         # Check there are any piece of any color in the path before final pos
         if self.__piece_in_path(move):
-            print("Error! There is a piece in the path")
+            if external:
+                print("Error! There is a piece in the path")
             return False
         # Check if the move causes check to king
         if self.__king_check(move):
-            print("Error! Can't leave your king high and dry mate!")
+            if external:
+                print("Error! Can't leave your king high and dry mate!")
             return False
         return True
 
@@ -365,8 +385,8 @@ class Board:
                 self.king_location[self.to_move] = [fx, fy]
             # Update the color to move
             self.to_move = 1 - self.to_move
-            # Print the board status
-            self.print_board()
+            # # Print the board status
+            # self.print_board()
         else:
             self.__iu_king_location = copy.deepcopy(self.king_location)
             # If king move then update king location
@@ -390,7 +410,7 @@ class Board:
                     continue 
                 moves = piece.get_candidate_moves(x, y, self.is_valid_matrix_location)
                 for move in moves: 
-                    if self.is_valid_move(move):
+                    if self.is_valid_move(move, False):
                         possible_move_list.append(move)
         return possible_move_list
 
