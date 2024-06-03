@@ -172,7 +172,6 @@ class Pawn(Piece):
             else:
                 flag3 &= (counter_piece.color == "B")
             # TODO: No suport for en passant right now.
-            print(flag1, flag2, flag3, y_displacement,  y_displacement == 2, flag2 &)
             if flag1 or flag2 or flag3:
                 return True
         if self.color == "B":
