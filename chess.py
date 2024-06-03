@@ -231,7 +231,7 @@ class Board:
         """
         Creating the unit vector for the path and following it one step at a time to see if piece in path
         """
-        ix, iy, fx, fy = move.initial_pos[1], move.initial_pos[0], move.final_pos[1], move.final_pos[0]
+        ix, iy, fx, fy = move.initial_pos[0], move.initial_pos[1], move.final_pos[0], move.final_pos[1]
         dx, dy = (0 if (fx - ix) == 0 else abs(fx - ix)//(fx - ix)), (0 if (fy - iy) == 0 else abs(fy - iy)//(fy - iy))
         x, y = ix, iy 
         # print(ix, iy, fx, fy, x, y, dx, dy)

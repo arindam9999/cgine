@@ -30,4 +30,8 @@
         0:"W",
         1:"B"
     }
-13. Refactor piece type as static variable 
+13. Refactor piece_type as static variable 
+
+Issues:
+1. Following moves works: P a2 a5 (V)
+2. Piece in path error for following move: P c2 c3, P c2 c4 (V)
